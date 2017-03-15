@@ -13,7 +13,7 @@ import javax.jms.TopicSubscriber;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-public class TesteConsumidorTopicNFE {
+public class SimpleTopicConsumerWithEstoqueIdentification {
 		
 	@SuppressWarnings("resource")
 	public static void main(String[] args) throws NamingException, JMSException {
@@ -34,7 +34,7 @@ public class TesteConsumidorTopicNFE {
 		InitialContext initialContext = new InitialContext();
 		ConnectionFactory connectionFactory = (ConnectionFactory)initialContext.lookup("ConnectionFactory");
 		Connection connection = connectionFactory.createConnection();
-		connection.setClientID("NFE");
+		connection.setClientID("Estoque");
 		connection.start();
 				
 		Destination destination = (Destination) initialContext.lookup("loja");

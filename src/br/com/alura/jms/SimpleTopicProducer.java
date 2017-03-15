@@ -10,7 +10,7 @@ import javax.jms.TextMessage;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-public class TesteProdutorTopicMessageSelector {
+public class SimpleTopicProducer {
 
 	@SuppressWarnings("resource")
 	public static void main(String[] args) throws NamingException, JMSException {
@@ -41,7 +41,6 @@ public class TesteProdutorTopicMessageSelector {
 		MessageProducer producer = session.createProducer(destination);
 
 		TextMessage textMessage = session.createTextMessage("Mensagem de topico");
-		textMessage.setBooleanProperty("ebook", true);
 		producer.send(textMessage);
 
 		// new Scanner(System.in).nextLine();

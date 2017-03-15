@@ -1,16 +1,19 @@
 package br.com.alura.jms;
 
+import java.util.Scanner;
+
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.JMSException;
-import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
+import javax.jms.Topic;
+import javax.jms.TopicSubscriber;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-public class TesteProdutorQueue {
+public class SimpleTopicConsumerWithNFEIdentification {
 		
 	@SuppressWarnings("resource")
 	public static void main(String[] args) throws NamingException, JMSException {
@@ -31,22 +34,35 @@ public class TesteProdutorQueue {
 		InitialContext initialContext = new InitialContext();
 		ConnectionFactory connectionFactory = (ConnectionFactory)initialContext.lookup("ConnectionFactory");
 		Connection connection = connectionFactory.createConnection();
+		connection.setClientID("NFE");
 		connection.start();
 				
-		Destination destination = (Destination) initialContext.lookup("financeiro");
+		Destination destination = (Destination) initialContext.lookup("loja");
 		
 		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-		MessageProducer producer = session.createProducer(destination);
 		
+//		Busca Mensagem mas na consome a mesma		
+//		QueueBrowser browser = session.createBrowser((Queue)destination);
+//		Enumeration enumeration = browser.getEnumeration();
+//		
+//		while(enumeration.hasMoreElements()){
+//			TextMessage text = (TextMessage)enumeration.nextElement();
+//			System.out.println("Browser queue: " + text.getText());
+//		}
+//								
+		TopicSubscriber consumer = session.createDurableSubscriber((Topic)destination, "loja");		
 		
+		consumer.setMessageListener(m->{
+			TextMessage text = (TextMessage)m;
+			try {
+				System.out.println("Mensagem recebida " + text.getText());
+			} catch (JMSException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});				
 		
-		for(int i = 0; i <= 1000 ;i++){
-			TextMessage textMessage = session.createTextMessage("Mensagem" + i);
-			producer.send(textMessage);
-		}
-		
-		
-//		new Scanner(System.in).nextLine();
+		new Scanner(System.in).nextLine();
 		
 		connection.close();
 		initialContext.close();

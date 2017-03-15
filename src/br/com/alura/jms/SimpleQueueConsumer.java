@@ -1,19 +1,21 @@
 package br.com.alura.jms;
 
+import java.util.Enumeration;
 import java.util.Scanner;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.JMSException;
+import javax.jms.MessageConsumer;
+import javax.jms.Queue;
+import javax.jms.QueueBrowser;
 import javax.jms.Session;
 import javax.jms.TextMessage;
-import javax.jms.Topic;
-import javax.jms.TopicSubscriber;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-public class TesteConsumidorTopicEstoque {
+public class SimpleQueueConsumer {
 		
 	@SuppressWarnings("resource")
 	public static void main(String[] args) throws NamingException, JMSException {
@@ -34,23 +36,21 @@ public class TesteConsumidorTopicEstoque {
 		InitialContext initialContext = new InitialContext();
 		ConnectionFactory connectionFactory = (ConnectionFactory)initialContext.lookup("ConnectionFactory");
 		Connection connection = connectionFactory.createConnection();
-		connection.setClientID("Estoque");
 		connection.start();
 				
-		Destination destination = (Destination) initialContext.lookup("loja");
+		Destination destination = (Destination) initialContext.lookup("financeiro");
 		
 		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 		
-//		Busca Mensagem mas na consome a mesma		
-//		QueueBrowser browser = session.createBrowser((Queue)destination);
-//		Enumeration enumeration = browser.getEnumeration();
-//		
-//		while(enumeration.hasMoreElements()){
-//			TextMessage text = (TextMessage)enumeration.nextElement();
-//			System.out.println("Browser queue: " + text.getText());
-//		}
-//								
-		TopicSubscriber consumer = session.createDurableSubscriber((Topic)destination, "loja");		
+		QueueBrowser browser = session.createBrowser((Queue)destination);
+		Enumeration enumeration = browser.getEnumeration();
+		
+		while(enumeration.hasMoreElements()){
+			TextMessage text = (TextMessage)enumeration.nextElement();
+			System.out.println("Browser queue: " + text.getText());
+		}
+								
+		MessageConsumer consumer = session.createConsumer(destination);
 		
 		consumer.setMessageListener(m->{
 			TextMessage text = (TextMessage)m;

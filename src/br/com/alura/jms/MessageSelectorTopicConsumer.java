@@ -13,7 +13,7 @@ import javax.jms.TopicSubscriber;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-public class TesteConsumidorTopicMessageSelector {
+public class MessageSelectorTopicConsumer {
 		
 	@SuppressWarnings("resource")
 	public static void main(String[] args) throws NamingException, JMSException {

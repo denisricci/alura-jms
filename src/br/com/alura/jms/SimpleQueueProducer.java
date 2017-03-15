@@ -1,21 +1,16 @@
 package br.com.alura.jms;
 
-import java.util.Enumeration;
-import java.util.Scanner;
-
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.JMSException;
-import javax.jms.MessageConsumer;
-import javax.jms.Queue;
-import javax.jms.QueueBrowser;
+import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-public class TesteConsumidorQueue {
+public class SimpleQueueProducer {
 		
 	@SuppressWarnings("resource")
 	public static void main(String[] args) throws NamingException, JMSException {
@@ -41,28 +36,17 @@ public class TesteConsumidorQueue {
 		Destination destination = (Destination) initialContext.lookup("financeiro");
 		
 		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+		MessageProducer producer = session.createProducer(destination);
 		
-		QueueBrowser browser = session.createBrowser((Queue)destination);
-		Enumeration enumeration = browser.getEnumeration();
 		
-		while(enumeration.hasMoreElements()){
-			TextMessage text = (TextMessage)enumeration.nextElement();
-			System.out.println("Browser queue: " + text.getText());
+		
+		for(int i = 0; i <= 1000 ;i++){
+			TextMessage textMessage = session.createTextMessage("Mensagem" + i);
+			producer.send(textMessage);
 		}
-								
-		MessageConsumer consumer = session.createConsumer(destination);
 		
-		consumer.setMessageListener(m->{
-			TextMessage text = (TextMessage)m;
-			try {
-				System.out.println("Mensagem recebida " + text.getText());
-			} catch (JMSException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		});				
 		
-		new Scanner(System.in).nextLine();
+//		new Scanner(System.in).nextLine();
 		
 		connection.close();
 		initialContext.close();
