@@ -12,23 +12,7 @@ import javax.naming.NamingException;
 
 public class MessageSelectorTopicProducer {
 
-	@SuppressWarnings("resource")
 	public static void main(String[] args) throws NamingException, JMSException {
-
-		/**************************************************************************
-		 * é possível utilizar o arquivo ou a classe Properties, para utilizar o
-		 * arquivo basta criar na pasta src o arquivo jndi.properties
-		 ***************************************************************************/
-
-		// Properties properties = new Properties();
-		// properties.setProperty("java.naming.factory.initial",
-		// "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
-		//
-		// properties.setProperty("java.naming.provider.url",
-		// "tcp://localhost:61616");
-		// properties.setProperty("queue.financeiro", "fila.financeiro");
-
-		// InitialContext initialContext = new InitialContext(properties);
 
 		InitialContext initialContext = new InitialContext();
 		ConnectionFactory connectionFactory = (ConnectionFactory) initialContext.lookup("ConnectionFactory");

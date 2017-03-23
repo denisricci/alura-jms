@@ -1,5 +1,6 @@
 package br.com.alura.jms;
 
+import java.io.Serializable;
 import java.util.Properties;
 
 import javax.jms.Connection;
@@ -9,9 +10,11 @@ import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
+import javax.jms.ObjectMessage;
 import javax.jms.Queue;
 import javax.jms.QueueBrowser;
 import javax.jms.Session;
+import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
 import javax.naming.InitialContext;
@@ -29,7 +32,7 @@ public class JmsBuilder {
 	}
 
 	public JmsBuilder(Properties properties) throws NamingException {
-		this.context = new InitialContext();
+		this.context = new InitialContext(properties);
 	}
 
 	public JmsBuilder newConnection() throws NamingException, JMSException {
@@ -39,7 +42,7 @@ public class JmsBuilder {
 	}
 
 	public JmsBuilder from(String destinationName) throws NamingException {
-		this.destination = (Destination) context.lookup("financeiro");
+		this.destination = (Destination) context.lookup(destinationName);
 		return this;
 	}
 
@@ -61,13 +64,25 @@ public class JmsBuilder {
 		consumer.setMessageListener(messageListener);
 		return consumer;
 	}
-	
-	public MessageProducer buildMessageProducer() throws JMSException{
+
+	public MessageProducer buildMessageProducer() throws JMSException {
+		if (session == null)
+			createDefaultSession();
 		return session.createProducer(destination);
 	}
-	
-	public TopicSubscriber buildTopicSubscriber(String subscriberName) throws JMSException{
-		return session.createDurableSubscriber((Topic)destination, subscriberName);
+
+	public TopicSubscriber buildTopicSubscriber(String subscriberName) throws JMSException {
+		return buildTopicSubscriber(subscriberName, null);
+	}
+
+	public TopicSubscriber buildTopicSubscriber(String subscriberName, MessageListener messageListener)
+			throws JMSException {
+		if (session == null)
+			createDefaultSession();
+		TopicSubscriber topicSubscriber = session.createDurableSubscriber((Topic) destination, subscriberName);
+		if (messageListener != null)
+			topicSubscriber.setMessageListener(messageListener);
+		return topicSubscriber;
 	}
 
 	public JmsBuilder withClientId(String clientID) throws JMSException {
@@ -81,14 +96,22 @@ public class JmsBuilder {
 		this.session.close();
 	}
 
+	public TextMessage createTextMessage(String message) throws JMSException {
+		return this.session.createTextMessage(message);
+	}
+	
+	public ObjectMessage createObjectMessage(Serializable obj) throws JMSException {
+		return this.session.createObjectMessage(obj);
+	}
+
 	private void createSession(boolean transacted, int acknowledgeStrategy) throws JMSException {
 		this.connection.start();
-		this.connection.createSession(transacted, acknowledgeStrategy);
+		this.session = this.connection.createSession(transacted, acknowledgeStrategy);
 	}
 
 	private void createDefaultSession() throws JMSException {
 		this.connection.start();
-		this.connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+		this.session = this.connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 	}
 
 }
